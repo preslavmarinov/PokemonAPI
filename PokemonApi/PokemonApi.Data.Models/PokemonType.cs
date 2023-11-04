@@ -9,8 +9,11 @@ namespace PokemonApi.Data.Models
     public class PokemonType
     {
         public Guid PokemonId { get; set; }
+
         public PokemonEntity Pokemon { get; set; }
+
         public Guid TypeId { get; set; }
+
         public TypeEntity Type { get; set; }
 
     }

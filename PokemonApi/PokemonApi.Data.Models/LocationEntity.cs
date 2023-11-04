@@ -9,6 +9,7 @@ namespace PokemonApi.Data.Models
     public class LocationEntity : BaseEntity
     {
         public string Name { get; set; }
+
         public ICollection<PokemonEntity> Pokemons { get; set; } = new HashSet<PokemonEntity>();
     }
 }
