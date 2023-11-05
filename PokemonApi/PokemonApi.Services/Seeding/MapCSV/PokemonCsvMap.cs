@@ -1,18 +1,30 @@
 ﻿using CsvHelper.Configuration;
-using PokemonApi.Services.DTO;
+using PokemonApi.Services.Seeding.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PokemonApi.Services.MapCSV
+namespace PokemonApi.Services.Seeding.MapCSV
 {
     public class PokemonCsvMap : ClassMap<PokemonCsvDTO>
     {
         public PokemonCsvMap()
         {
             Map(m => m.Name).Name("name");
+
+            Map(m => m.TypeIds).Convert(row => row.Row.GetField("type_ids")!
+            .Trim(new char[] { '[', ']' })
+            .Split(", ")
+            .ToArray()
+            );
+
+            Map(m => m.Types).Convert(row => row.Row.GetField("types")!
+            .Trim(new char[] { '[', ']' })
+            .Split(", ")
+            .ToArray()
+            );
 
             Map(m => m.HP).Name("hp");
 
@@ -30,7 +42,6 @@ namespace PokemonApi.Services.MapCSV
 
             Map(m => m.Location).Name("location");
 
-            //TODO - Map Types and TypeIds
         }
     }
 }

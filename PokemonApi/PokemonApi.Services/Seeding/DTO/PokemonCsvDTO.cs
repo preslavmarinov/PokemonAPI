@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PokemonApi.Services.DTO
+namespace PokemonApi.Services.Seeding.DTO
 {
     public class PokemonCsvDTO
     {

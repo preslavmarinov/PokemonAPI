@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\**" />
+    <Content Remove="Controllers\**" />
+    <EmbeddedResource Remove="Controllers\**" />
+    <None Remove="Controllers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
       <PrivateAssets>all</PrivateAssets>
@@ -21,12 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\PokemonApi.Common\PokemonApi.Common.csproj" />
     <ProjectReference Include="..\PokemonApi.Data.Models\PokemonApi.Data.Models.csproj" />
     <ProjectReference Include="..\PokemonApi.Data\PokemonApi.Data.csproj" />
+    <ProjectReference Include="..\PokemonApi.Services\PokemonApi.Services.csproj" />
   </ItemGroup>
 
 </Project>

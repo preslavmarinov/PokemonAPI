@@ -14,9 +14,9 @@ namespace PokemonApi.Data
 
         public DbSet<PokemonEntity> Pokemons { get; set; } = default!;
 
-        public DbSet<LocationEntity> Location { get; set; } = default!;
+        public DbSet<LocationEntity> Locations { get; set; } = default!;
 
-        public DbSet<TypeEntity> Type { get; set; } = default!;
+        public DbSet<TypeEntity> Types { get; set; } = default!;
 
         public DbSet<PokemonType> PokemonTypes { get; set; } = default!;
 
