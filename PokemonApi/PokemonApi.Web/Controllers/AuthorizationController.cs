@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Services.Interfaces;
+using PokemonApi.Web.Controllers.Abstract;
+using PokemonApi.Web.Models.User;
 
 namespace PokemonApi.Web.Controllers
 {
-    public class AuthorizationController : ControllerBase
+    public class AuthorizationController : ApiBaseController
     {
         private readonly IAuthorizationService _authorizationService;
 
@@ -13,20 +15,20 @@ namespace PokemonApi.Web.Controllers
         }
 
         [HttpPost]
-        [Route("Register")]
-        public async Task<IActionResult> Register()
+        [Route("register")]
+        public async Task<IActionResult> Register(RegisterUserModel user)
         {
-            var result = await this._authorizationService.RegisterAsync("SSsdhs@gmail.com", "ss123sj");
+            var result = await this._authorizationService.RegisterAsync(user.Email, user.Password);
 
             return this.Ok(result);
         }
 
 
         [HttpPost]
-        [Route("Login")]
-        public async Task<IActionResult> Login()
+        [Route("login")]
+        public async Task<IActionResult> Login(LoginUserModel user)
         {
-            var token = await this._authorizationService.LoginAsync("sdhs", "ss123sj");
+            var token = await this._authorizationService.LoginAsync(user.Email, user.Password);
 
             if(token == null)
             {

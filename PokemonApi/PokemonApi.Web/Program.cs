@@ -57,6 +57,8 @@ builder.Services.AddSqlServer<PokemonDbContext>(builder.Configuration.GetConnect
 
 builder.Services.AddTransient<ISeeder, Seeder>();
 builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
+builder.Services.AddTransient<ILocationService, LocationService>();
+builder.Services.AddTransient<ITypeService, TypeService>();
 
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtSecret").Value);
@@ -108,6 +110,6 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapDefaultControllerRoute();
 
 app.Run();
