@@ -26,6 +26,9 @@ namespace PokemonApi.Services
 
         public async Task DeleteTypeAsync(Guid id)
         {
+            var pokemonTypes = await this._context.PokemonTypes.Where(x => x.TypeId == id).ToArrayAsync();
+            this._context.PokemonTypes.RemoveRange(pokemonTypes);
+
             var type = this._context.Types.FirstOrDefault(x => x.Id == id);
 
             this._context.Types.Remove(type);
@@ -45,6 +48,7 @@ namespace PokemonApi.Services
 
         public async Task<TypeEntity> UpdateTypeAsync(TypeEntity type)
         {
+            //TODO
             this._context.Types.Update(type);
 
             await this._context.SaveChangesAsync();
@@ -54,5 +58,21 @@ namespace PokemonApi.Services
 
         public async Task<bool> ExistsAsync(Guid id)
             => await this._context.Types.AnyAsync(x => x.Id == id);
+
+        public async Task<IEnumerable<T>> GetPokemonsByType<T>(Guid id, int page, int perPage, Expression<Func<PokemonEntity, T>> selector)
+        {
+            var pokemonIds = await this._context.PokemonTypes.Where(x => x.TypeId == id).Select(x => x.PokemonId).ToListAsync();
+
+            if (page == 0 || perPage == 0)
+            {
+                return await this._context.Pokemons.Where(x => pokemonIds.Contains(x.Id)).Select(selector).ToListAsync();
+            }
+
+            return await this._context.Pokemons
+                .Skip((page-1)*perPage)
+                .Take(perPage)
+                .Where(x => pokemonIds.Contains(x.Id))
+                .Select(selector).ToListAsync();
+        }
     }
 }

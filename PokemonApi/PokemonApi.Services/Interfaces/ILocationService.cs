@@ -17,5 +17,7 @@ namespace PokemonApi.Services.Interfaces
         public Task<T?> GetLocationByIdAsync<T>(Guid id, Expression<Func<LocationEntity, T>> selector);
 
         public Task<bool> ExistsAsync(Guid id);
+
+        public Task<IEnumerable<T>> GetPokemonsFromLocation<T>(Guid id, int page, int perPage, Expression<Func<PokemonEntity, T>> selector);
     }
 }

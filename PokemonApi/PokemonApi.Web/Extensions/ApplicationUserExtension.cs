@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using PokemonApi.Common;
 using PokemonApi.Data.Models.Identity;
 
 namespace PokemonApi.Web.Extensions
@@ -16,8 +17,8 @@ namespace PokemonApi.Web.Extensions
                 return;
             }
 
-            var adminRole = CreateRole("admin");
-            var userRole = CreateRole("user");
+            var adminRole = CreateRole(RoleNames.ADMIN);
+            var userRole = CreateRole(RoleNames.USER);
 
             await roleManager.CreateAsync(adminRole);
             await roleManager.CreateAsync(userRole);
@@ -39,7 +40,7 @@ namespace PokemonApi.Web.Extensions
             var result =  await userManager.CreateAsync(admin, "admin12345");
             if(result.Succeeded)
             {
-                await userManager.AddToRoleAsync(admin, "admin");
+                await userManager.AddToRoleAsync(admin, RoleNames.ADMIN);
             }
             else
             {

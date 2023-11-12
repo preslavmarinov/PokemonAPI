@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using PokemonApi.Common;
 using PokemonApi.Common.Configurations;
 using PokemonApi.Data;
 using PokemonApi.Data.Models.Identity;
@@ -15,8 +16,6 @@ using System.Net;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-//const string csvPath = "C:\\Users\\Preslav Marinov\\OneDrive\\Desktop\\pokemon-csv-files\\new-pokemon.csv";
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -59,9 +58,17 @@ builder.Services.AddTransient<ISeeder, Seeder>();
 builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
 builder.Services.AddTransient<ILocationService, LocationService>();
 builder.Services.AddTransient<ITypeService, TypeService>();
+builder.Services.AddTransient<IPokemonService, PokemonService>();
 
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtSecret").Value);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        PolicyNames.USER_AND_ABOVE,
+        policy => policy.RequireRole(RoleNames.USER, RoleNames.ADMIN));
+});
 
 builder.Services
     .AddAuthentication(x =>
@@ -107,6 +114,8 @@ await app.SeedRolesAsync();
 await app.SeedUsersAsync();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

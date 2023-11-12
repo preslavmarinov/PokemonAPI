@@ -21,5 +21,8 @@ namespace PokemonApi.Services.Interfaces
         public Task<T?> GetTypeByIdAsync<T>(Guid id, Expression<Func<TypeEntity, T>> selector);
 
         public Task<bool> ExistsAsync(Guid id);
+
+        public Task<IEnumerable<T>> GetPokemonsByType<T>(Guid id, int page, int perPage, Expression<Func<PokemonEntity, T>> selector);
+
     }
 }

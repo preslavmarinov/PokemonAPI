@@ -2,6 +2,7 @@
 using PokemonApi.Data;
 using PokemonApi.Data.Models;
 using PokemonApi.Services.Interfaces;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace PokemonApi.Services
@@ -26,7 +27,7 @@ namespace PokemonApi.Services
 
         public async Task DeleteLocationAsync(Guid id)
         {
-            var location = this._context.Locations.FirstOrDefault(x => x.Id == id);
+            var location = await this._context.Locations.FirstOrDefaultAsync(x => x.Id == id);
 
             this._context.Locations.Remove(location);
 
@@ -54,5 +55,16 @@ namespace PokemonApi.Services
 
         public async Task<bool> ExistsAsync(Guid id)
             => await this._context.Locations.AnyAsync(x => x.Id == id);
+
+
+        public async Task<IEnumerable<T>> GetPokemonsFromLocation<T>(Guid id, int page, int perPage, Expression<Func<PokemonEntity, T>> selector)
+        {
+            if (page == 0 || perPage == 0)
+            {
+                return await this._context.Pokemons.Where(x => x.LocationId == id).Select(selector).ToListAsync();
+            }
+
+            return await this._context.Pokemons.Skip((page-1)*perPage).Take(perPage).Where(x => x.LocationId == id).Select(selector).ToListAsync();
+        }
     }
 }

@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using PokemonApi.Common;
 using PokemonApi.Data.Models.Identity;
 using PokemonApi.Services.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PokemonApi.Services
 {
@@ -74,7 +71,7 @@ namespace PokemonApi.Services
             {
                 return result;
             }
-            await _userManager.AddToRoleAsync(user, "user");
+            await _userManager.AddToRoleAsync(user, RoleNames.USER);
 
             return result;
         }
