@@ -44,13 +44,16 @@ namespace PokemonApi.Services
             return await this._context.Locations.Select(selector).ToListAsync();
         }
 
-        public async Task<LocationEntity> UpdateLocationAsync(LocationEntity location)
+        public async Task<LocationEntity> UpdateLocationAsync(Guid id, LocationEntity updatedlocation)
         {
-            this._context.Locations.Update(location);
+            var existingLocation = await this._context.Locations.FindAsync(id);
+            existingLocation.Name = updatedlocation.Name;
+
+            this._context.Locations.Update(existingLocation);
 
             await this._context.SaveChangesAsync();
 
-            return location;
+            return existingLocation;
         }
 
         public async Task<bool> ExistsAsync(Guid id)

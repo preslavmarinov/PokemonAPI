@@ -11,6 +11,7 @@ using PokemonApi.Services;
 using PokemonApi.Services.Interfaces;
 using PokemonApi.Services.Seeding;
 using PokemonApi.Web.Extensions;
+using PokemonApi.Web.Mapper;
 using Swashbuckle.AspNetCore.Filters;
 using System.Net;
 using System.Text;
@@ -59,6 +60,7 @@ builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
 builder.Services.AddTransient<ILocationService, LocationService>();
 builder.Services.AddTransient<ITypeService, TypeService>();
 builder.Services.AddTransient<IPokemonService, PokemonService>();
+builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtSecret").Value);

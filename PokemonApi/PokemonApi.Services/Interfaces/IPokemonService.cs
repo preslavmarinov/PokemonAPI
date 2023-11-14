@@ -14,9 +14,9 @@ namespace PokemonApi.Services.Interfaces
 
         public Task DeletePokemonAsync(Guid id);
 
-        public Task<PokemonEntity> UpdatePokemonAsync(PokemonEntity pokemon);
+        public Task<PokemonEntity> UpdatePokemonAsync(Guid id, PokemonEntity pokemon);
 
-        public Task<IEnumerable<T>> GetPokemonsAsync<T>(int page, int perPage, Expression<Func<PokemonEntity, T>> selector);
+        public Task<IEnumerable<PokemonEntity>> GetPokemonsAsync(int page, int perPage, string sortAttr, string sortDir);
 
         public Task<T?> GetPokemonByIdAsync<T>(Guid id, Expression<Func<PokemonEntity, T>> selector);
 

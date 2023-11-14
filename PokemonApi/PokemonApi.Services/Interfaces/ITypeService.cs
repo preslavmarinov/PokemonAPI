@@ -14,7 +14,7 @@ namespace PokemonApi.Services.Interfaces
 
         public Task DeleteTypeAsync(Guid id);
 
-        public Task<TypeEntity> UpdateTypeAsync(TypeEntity location);
+        public Task<TypeEntity> UpdateTypeAsync(Guid id, TypeEntity location);
 
         public Task<IEnumerable<T>> GetTypesAsync<T>(Expression<Func<TypeEntity, T>> selector);
 

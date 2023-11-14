@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Common;
+using PokemonApi.Common.Enums;
 using PokemonApi.Data.Models;
 using PokemonApi.Services.Interfaces;
 using PokemonApi.Services.Seeding.DTO;
@@ -10,6 +12,7 @@ using PokemonApi.Web.Models.Pokemon;
 using PokemonApi.Web.Models.Type;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PokemonApi.Web.Controllers
 {
@@ -17,10 +20,12 @@ namespace PokemonApi.Web.Controllers
     public class PokemonController : ApiBaseController
     {
         private readonly IPokemonService _pokemonService;
+        private readonly IMapper _mapper;
 
-        public PokemonController(IPokemonService pokemonService)
+        public PokemonController(IPokemonService pokemonService, IMapper mapper)
         {
             this._pokemonService = pokemonService;
+            this._mapper = mapper;
         }
 
         [HttpGet("pokemon/{id}")]
@@ -51,23 +56,14 @@ namespace PokemonApi.Web.Controllers
         [HttpGet("pokemons")]
         public async Task<IActionResult> GetPokemons(
             [FromQuery][Range(0, int.MaxValue)] int page=1,
-            [FromQuery][Range(0, 100)] int perPage=5)
+            [FromQuery][Range(0, 100)] int perPage = 5,
+            [FromQuery][EnumDataType(typeof(SortAttribute))] SortAttribute? sortAttr=null,
+            [FromQuery][EnumDataType(typeof(SortDirection))] SortDirection? sortDir=null)
         {
-            var pokemons = await this._pokemonService.GetPokemonsAsync(page, perPage, x => new PokemonViewModel
-            {
-                Name = x.Name,
-                HP = x.HP.ToString(),
-                Attack = x.Attack.ToString(),
-                Defence = x.Defence.ToString(),
-                Speed = x.Speed.ToString(),
-                Generation = x.Generation.ToString(),
-                IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewInputModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewInputModel { Name = x.Location.Name },
-                Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
-            });
+            var pokemonEntites = await this._pokemonService.GetPokemonsAsync(page, perPage, sortAttr.ToString(), sortDir.ToString());
+            var pokemonViewModels = _mapper.Map<IEnumerable<PokemonViewModel>>(pokemonEntites);
 
-            return this.Ok(pokemons);
+            return this.Ok(pokemonViewModels);
         }
 
         [HttpPost("pokemon")]
@@ -118,9 +114,9 @@ namespace PokemonApi.Web.Controllers
                 LocationId = pokemon.LocationId,
             };
 
-            await this._pokemonService.UpdatePokemonAsync(updatedPokemon);
+            var existingPokemon = await this._pokemonService.UpdatePokemonAsync(id, updatedPokemon);
 
-            return this.Ok(updatedPokemon);
+            return this.Ok(existingPokemon);
         }
 
         [HttpDelete("pokemon/{id}")]

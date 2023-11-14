@@ -10,7 +10,7 @@ namespace PokemonApi.Services.Interfaces
 
         public Task DeleteLocationAsync(Guid id);
 
-        public Task<LocationEntity> UpdateLocationAsync(LocationEntity location);
+        public Task<LocationEntity> UpdateLocationAsync(Guid id, LocationEntity location);
 
         public Task<IEnumerable<T>> GetLocationsAsync<T>(Expression<Func<LocationEntity, T>> selector);
 

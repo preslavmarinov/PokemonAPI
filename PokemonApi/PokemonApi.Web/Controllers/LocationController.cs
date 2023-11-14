@@ -95,9 +95,9 @@ namespace PokemonApi.Web.Controllers
 
             var updatedlocation = new LocationEntity { Name = location.Name };
 
-            await this._locationService.UpdateLocationAsync(updatedlocation);
+            var existingLocation = await this._locationService.UpdateLocationAsync(id,updatedlocation);
 
-            return this.Ok(updatedlocation);
+            return this.Ok(existingLocation);
         }
 
         [HttpDelete("location/{id}")]

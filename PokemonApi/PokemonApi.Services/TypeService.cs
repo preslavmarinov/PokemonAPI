@@ -46,14 +46,17 @@ namespace PokemonApi.Services
             return await this._context.Types.Select(selector).ToListAsync();
         }
 
-        public async Task<TypeEntity> UpdateTypeAsync(TypeEntity type)
+        public async Task<TypeEntity> UpdateTypeAsync(Guid id, TypeEntity updatedType)
         {
-            //TODO
-            this._context.Types.Update(type);
+            var existingType = await this._context.Types.FindAsync(id);
+
+            existingType.Name = updatedType.Name;
+
+            this._context.Types.Update(existingType);
 
             await this._context.SaveChangesAsync();
 
-            return type;
+            return existingType;
         }
 
         public async Task<bool> ExistsAsync(Guid id)

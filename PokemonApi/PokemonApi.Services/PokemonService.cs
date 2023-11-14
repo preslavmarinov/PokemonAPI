@@ -46,18 +46,45 @@ namespace PokemonApi.Services
             return await this._context.Pokemons.Where(x => x.Id == id).Select(selector).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>> GetPokemonsAsync<T>(int page, int perPage, Expression<Func<PokemonEntity, T>> selector)
+        public async Task<IEnumerable<PokemonEntity>> GetPokemonsAsync(int page, int perPage, string sortAttr, string sortDir)
         {
-            return await this._context.Pokemons.Skip((page-1)*perPage).Take(perPage).Select(selector).ToListAsync();
+            string sqlQuery = "SELECT * FROM Pokemons";
+
+            string sortQuery = "";
+            if (!string.IsNullOrEmpty(sortAttr) && !string.IsNullOrEmpty(sortDir))
+            {
+                sortQuery = $"ORDER BY {sortAttr} {sortDir}";
+            }
+            else
+            {
+                sortQuery = "ORDER BY (SELECT NULL)";
+            }
+
+            string pageQuery = $"OFFSET {(page - 1) * perPage} ROWS FETCH NEXT {perPage} ROWS ONLY";
+
+            sqlQuery += $" {sortQuery} {pageQuery}";
+
+            return await this._context.Pokemons.FromSqlRaw(sqlQuery).ToListAsync();
         }
 
-        public async Task<PokemonEntity> UpdatePokemonAsync(PokemonEntity pokemon)
+        public async Task<PokemonEntity> UpdatePokemonAsync(Guid id, PokemonEntity updatedPokemon)
         {
-            this._context.Pokemons.Update(pokemon);
+            var existingPokemon = await this._context.Pokemons.FindAsync(id);
+            existingPokemon.Name = updatedPokemon.Name;
+            existingPokemon.HP= updatedPokemon.HP;
+            existingPokemon.Attack = updatedPokemon.Attack;
+            existingPokemon.Defence = updatedPokemon.Defence;
+            existingPokemon.Speed = updatedPokemon.Speed;
+            existingPokemon.Generation = updatedPokemon.Generation;
+            existingPokemon.IsLegendary = updatedPokemon.IsLegendary;
+            existingPokemon.Types = updatedPokemon.Types;
+            existingPokemon.LocationId = updatedPokemon.LocationId;
+
+            this._context.Pokemons.Update(existingPokemon);
 
             await this._context.SaveChangesAsync();
 
-            return pokemon;
+            return existingPokemon;
         }
 
         public async Task<bool> ExistsAsync(Guid id)

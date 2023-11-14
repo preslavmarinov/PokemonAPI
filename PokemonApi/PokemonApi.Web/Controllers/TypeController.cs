@@ -95,9 +95,9 @@ namespace PokemonApi.Web.Controllers
 
             var updatedType = new TypeEntity { Name = type.Name };
 
-            await this._typeService.UpdateTypeAsync(updatedType);
+            var existingType = await this._typeService.UpdateTypeAsync(id, updatedType);
 
-            return this.Ok(updatedType);
+            return this.Ok(existingType);
         }
 
         [HttpDelete("type/{id}")]
