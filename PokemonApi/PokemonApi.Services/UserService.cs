@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PokemonApi.Data;
+using PokemonApi.Data.Models;
 using PokemonApi.Data.Models.Identity;
 using PokemonApi.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace PokemonApi.Services
 {
@@ -22,48 +19,54 @@ namespace PokemonApi.Services
             this._context = context;
         }
 
-        public async Task<Guid> CreateUserAsync(ApplicationUser user)
+        public async Task<Guid> CreateUserAsync(ApplicationUser user, string password, string role)
         {
-            return Guid.NewGuid();
-            //var newUser = new ApplicationUser
-            //{
-            //    UserName = user.Email,
-            //    NormalizedUserName = user.Email.ToUpper(),
-            //    Email = user.Email,
-            //    SecurityStamp = Guid.NewGuid().ToString(),
-            //};
+            var result = await _userManager.CreateAsync(user, password);
 
-            //var result = await _userManager.CreateAsync(newUser, user.PasswordHash);
+            await _userManager.AddToRoleAsync(user, role);
 
-            //if (!result.Succeeded)
-            //{
-            //    return result;
-            //}
-            //await _userManager.AddToRoleAsync(newUser, "user");
-
-            //return result;
+            return user.Id;
         }
 
         public async Task DeleteUserAsync(Guid id)
         {
-            //var user = await GetUserByIdAsync(id, ApplicationUser);
+            var user = await GetUserByIdAsync(id);
+            var userRoles = await this._userManager.GetRolesAsync(user);
 
-            //this._userManager.DeleteAsync();
+            foreach (var role in userRoles)
+            {
+                await _userManager.RemoveFromRoleAsync(user, role);
+            }
+
+            await this._userManager.DeleteAsync(user);
+            await this._context.SaveChangesAsync();
         }
 
-        public Task<T> GetUserByIdAsync<T>(Guid id, System.Linq.Expressions.Expression<Func<ApplicationUser, T>> selector)
+        public async Task<ApplicationUser> GetUserByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await this._userManager.FindByIdAsync(id.ToString());
         }
 
-        public Task<IEnumerable<T>> GetUsersAsync<T>(System.Linq.Expressions.Expression<Func<ApplicationUser, T>> selector)
+        public async Task<IEnumerable<ApplicationUser>> GetUsersAsync()
         {
-            throw new NotImplementedException();
+            return await this._userManager.Users.ToListAsync();
         }
 
-        public Task<ApplicationUser> UpdateUserAsync(ApplicationUser user)
+        public async Task<IEnumerable<T>> GetUserPokemonsAsync<T>(Guid id, Expression<Func<PokemonEntity, T>> selector)
         {
-            throw new NotImplementedException();
+            return await this._context.Pokemons.Where(x => x.ApplicationUserId == id).Select(selector).ToListAsync();
+        }
+
+        public async Task<ApplicationUser> UpdateUserAsync(Guid id, ApplicationUser user)
+        {
+            var existingUser = await this.GetUserByIdAsync(id);
+            existingUser.UserName = user.UserName;
+            existingUser.Email = user.Email;
+            existingUser.NormalizedUserName= user.NormalizedUserName;
+
+            await this._userManager.UpdateAsync(existingUser);
+
+            return existingUser;
         }
 
         public async Task<bool> ExistsAsync(Guid id)

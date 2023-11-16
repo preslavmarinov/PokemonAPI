@@ -60,6 +60,7 @@ builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
 builder.Services.AddTransient<ILocationService, LocationService>();
 builder.Services.AddTransient<ITypeService, TypeService>();
 builder.Services.AddTransient<IPokemonService, PokemonService>();
+builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 

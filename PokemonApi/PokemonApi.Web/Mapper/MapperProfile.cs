@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using PokemonApi.Data.Models;
+using PokemonApi.Data.Models.Identity;
 using PokemonApi.Web.Models.Location;
 using PokemonApi.Web.Models.Pokemon;
 using PokemonApi.Web.Models.Type;
+using PokemonApi.Web.Models.User;
 
 namespace PokemonApi.Web.Mapper
 {
@@ -21,6 +23,10 @@ namespace PokemonApi.Web.Mapper
                 .ForMember(dest => dest.Types, opt => opt.MapFrom(src => src.Types.Select(y => new TypeViewInputModel { Name = y.Type.Name }).ToArray()))
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(src => new LocationViewInputModel { Name = src.Location.Name }))
                 .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.ApplicationUser != null ? src.ApplicationUser.Email : null));
+
+            CreateMap<ApplicationUser, UserViewModel>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
         }
     }
 }

@@ -21,4 +21,11 @@ namespace PokemonApi.Common.Enums
         ASC,
         DESC,
     }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum Role
+    {
+        user,
+        admin
+    }
 }

@@ -1,4 +1,5 @@
-﻿using PokemonApi.Data.Models.Identity;
+﻿using PokemonApi.Data.Models;
+using PokemonApi.Data.Models.Identity;
 using System.Linq.Expressions;
 
 
@@ -6,15 +7,17 @@ namespace PokemonApi.Services.Interfaces
 {
     public interface IUserService
     {
-        public Task<IEnumerable<T>> GetUsersAsync<T>(Expression<Func<ApplicationUser, T>> selector);
+        public Task<IEnumerable<ApplicationUser>> GetUsersAsync();
 
-        public Task<T> GetUserByIdAsync<T>(Guid id, Expression<Func<ApplicationUser, T>> selector); 
+        public Task<ApplicationUser> GetUserByIdAsync(Guid id);
 
-        public Task<Guid> CreateUserAsync(ApplicationUser user);
+        public Task<IEnumerable<T>> GetUserPokemonsAsync<T>(Guid id, Expression<Func<PokemonEntity, T>> selector);
+
+        public Task<Guid> CreateUserAsync(ApplicationUser user, string password, string role);
 
         public Task DeleteUserAsync(Guid id);
 
-        public Task<ApplicationUser> UpdateUserAsync(ApplicationUser user);
+        public Task<ApplicationUser> UpdateUserAsync(Guid id, ApplicationUser user);
 
         public Task<bool> ExistsAsync(Guid id);
     }
