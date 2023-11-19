@@ -20,6 +20,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddMemoryCache(options =>
+{
+    var cacheConfig = builder.Configuration.GetSection("Cache").Get<CacheConfiguration>();
+
+    options.SizeLimit = cacheConfig.MaxSize;
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -61,6 +68,7 @@ builder.Services.AddTransient<ILocationService, LocationService>();
 builder.Services.AddTransient<ITypeService, TypeService>();
 builder.Services.AddTransient<IPokemonService, PokemonService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IPlayService, PlayService>();
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 
@@ -71,6 +79,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(
         PolicyNames.USER_AND_ABOVE,
         policy => policy.RequireRole(RoleNames.USER, RoleNames.ADMIN));
+
+    options.AddPolicy(
+        PolicyNames.ADMIN_ONLY,
+        policy => policy.RequireRole(RoleNames.ADMIN));
 });
 
 builder.Services

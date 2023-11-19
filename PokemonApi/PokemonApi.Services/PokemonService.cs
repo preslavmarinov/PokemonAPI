@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PokemonApi.Data;
 using PokemonApi.Data.Models;
+using PokemonApi.Data.Models.Identity;
 using PokemonApi.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -14,10 +16,12 @@ namespace PokemonApi.Services
     public class PokemonService : IPokemonService
     {
         private readonly PokemonDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public PokemonService(PokemonDbContext context)
+        public PokemonService(PokemonDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<Guid> CreatePokemonAsync(PokemonEntity pokemon)
@@ -64,7 +68,30 @@ namespace PokemonApi.Services
 
             sqlQuery += $" {sortQuery} {pageQuery}";
 
-            return await this._context.Pokemons.FromSqlRaw(sqlQuery).ToListAsync();
+            var pokemons = await this._context.Pokemons.FromSqlRaw(sqlQuery).ToListAsync();
+
+
+            foreach( var pokemon in pokemons )
+            {
+                if(pokemon.LocationId != null)
+                {
+                    pokemon.Location = await this._context.Locations.Where(x => x.Id == pokemon.LocationId).FirstOrDefaultAsync();
+                }
+
+                var pokemonTypes = await this._context.PokemonTypes.Where(x => x.PokemonId == pokemon.Id).ToListAsync();
+                pokemon.Types = pokemonTypes;
+                foreach( var type in pokemonTypes )
+                {
+                    type.Type = await this._context.Types.FirstOrDefaultAsync(x => x.Id == type.TypeId);
+                }
+
+                if(pokemon.ApplicationUserId != null)
+                {
+                    pokemon.ApplicationUser = await this._userManager.FindByIdAsync(pokemon.ApplicationUserId.ToString());
+                }
+            }
+
+            return pokemons;
         }
 
         public async Task<PokemonEntity> UpdatePokemonAsync(Guid id, PokemonEntity updatedPokemon)
@@ -89,5 +116,28 @@ namespace PokemonApi.Services
 
         public async Task<bool> ExistsAsync(Guid id)
             => await this._context.Pokemons.AnyAsync(x => x.Id == id);
+
+        public static void PrintPokemonDetails(PokemonEntity pokemon)
+        {
+            Console.WriteLine($"Pokemon Details for {pokemon.Name}:");
+            Console.WriteLine($"HP: {pokemon.HP}");
+            Console.WriteLine($"Attack: {pokemon.Attack}");
+            Console.WriteLine($"Defence: {pokemon.Defence}");
+            Console.WriteLine($"Speed: {pokemon.Speed}");
+            Console.WriteLine($"Generation: {pokemon.Generation}");
+            Console.WriteLine($"Is Legendary: {pokemon.IsLegendary}");
+
+            Console.WriteLine("Types:");
+            foreach (var type in pokemon.Types)
+            {
+                Console.WriteLine($"  {type.Type.Name}");
+            }
+            Console.WriteLine($"LocationId: {pokemon.LocationId}");
+            Console.WriteLine($"Location: {pokemon.Location?.Name ?? "Unknown"}");
+            Console.WriteLine($"User: {pokemon.ApplicationUser?.UserName ?? "Unknown"}");
+            Console.WriteLine($"UserId: {pokemon.ApplicationUserId}");
+
+            Console.WriteLine("------------------------------");
+        }
     }
 }

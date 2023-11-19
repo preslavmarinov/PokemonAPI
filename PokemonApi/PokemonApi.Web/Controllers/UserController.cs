@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PokemonApi.Common;
 using PokemonApi.Common.Enums;
 using PokemonApi.Data.Models.Identity;
 using PokemonApi.Services.Interfaces;
@@ -12,6 +14,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PokemonApi.Web.Controllers
 {
+    [Authorize(PolicyNames.ADMIN_ONLY)]
     public class UserController : ApiBaseController
     {
         private readonly IUserService _userService;
@@ -60,8 +63,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewInputModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewInputModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray(),
+                Location = new LocationViewModel { Name = x.Location.Name },
                 Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
             });
 

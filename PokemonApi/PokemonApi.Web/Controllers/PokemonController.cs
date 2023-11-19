@@ -33,6 +33,7 @@ namespace PokemonApi.Web.Controllers
         {
             var pokemon = await this._pokemonService.GetPokemonByIdAsync(id,x => new PokemonViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
                 HP = x.HP.ToString(),
                 Attack = x.Attack.ToString(),
@@ -40,8 +41,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewInputModel { Name = y.Type.Name}).ToArray(),
-                Location = new LocationViewInputModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name}).ToArray(),
+                Location = new LocationViewModel { Name = x.Location.Name },
                 Owner = x.ApplicationUser!=null ? x.ApplicationUser.Email : null,
             });
 

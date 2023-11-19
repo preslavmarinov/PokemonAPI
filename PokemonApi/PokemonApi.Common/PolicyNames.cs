@@ -9,5 +9,7 @@ namespace PokemonApi.Common
     public static class PolicyNames
     {
         public const string USER_AND_ABOVE = "userAndAbove";
+
+        public const string ADMIN_ONLY = "adminOnly";
     }
 }

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using PokemonApi.Common;
+using PokemonApi.Common.Configurations;
 using PokemonApi.Data.Models;
 using PokemonApi.Services.Interfaces;
 using PokemonApi.Web.Controllers.Abstract;
@@ -9,24 +12,29 @@ using PokemonApi.Web.Models.Pokemon;
 using PokemonApi.Web.Models.Type;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiI0NDNlYWFkOS1lYmI3LTQyOTgtNGZmYS0wOGRiZGUzNzIyYWIiLCJVc2VyTmFtZSI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcwMDQxMDc2NSwiZXhwIjoxNzAwNDk3MTY1LCJpYXQiOjE3MDA0MTA3NjV9.4vYofN0EduktvoMFplJ3XZnK9Cza97a8-paFZ-rjAhk
 namespace PokemonApi.Web.Controllers
 {
     [Authorize(PolicyNames.USER_AND_ABOVE)]
     public class LocationController : ApiBaseController
     {
         private readonly ILocationService _locationService;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IConfiguration _configuration;
 
-        public LocationController(ILocationService locationService)
+        public LocationController(ILocationService locationService, IMemoryCache memoryCache, IConfiguration configuration)
         {
             this._locationService = locationService;
+            this._memoryCache = memoryCache;
+            this._configuration = configuration;
         }
 
         [HttpGet("location/{id}")]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            var location = await this._locationService.GetLocationByIdAsync(id, x => new LocationViewInputModel
+            var location = await this._locationService.GetLocationByIdAsync(id, x => new LocationViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
             });
 
@@ -41,7 +49,24 @@ namespace PokemonApi.Web.Controllers
         [HttpGet("locations")]
         public async Task<IActionResult> GetLocations()
         {
-            var locations = await this._locationService.GetLocationsAsync(x => new LocationViewInputModel { Name = x.Name });
+            bool isRequestCached = this._memoryCache.TryGetValue(CacheKeys.LOCATIONS_CACHE_KEY, out IEnumerable<LocationViewModel> cachedData);
+
+            if (isRequestCached)
+            {
+                return this.Ok(cachedData);
+            }
+
+            var locations = await this._locationService.GetLocationsAsync(x => new LocationViewModel { Id = x.Id, Name = x.Name });
+
+            long expiration = this._configuration.GetSection("Cache").Get<CacheConfiguration>().Duration;
+
+            this._memoryCache.Set(
+                CacheKeys.LOCATIONS_CACHE_KEY,
+                locations,
+                new MemoryCacheEntryOptions()
+                    .SetSize(locations.LongCount())
+                    .SetAbsoluteExpiration(
+                        TimeSpan.FromSeconds(expiration)));
 
             return this.Ok(locations);
         }
@@ -54,6 +79,7 @@ namespace PokemonApi.Web.Controllers
         {
             var pokemons = await this._locationService.GetPokemonsFromLocation(locationId, page, perPage, x => new PokemonViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
                 HP = x.HP.ToString(),
                 Attack = x.Attack.ToString(),
@@ -61,8 +87,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewInputModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewInputModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray(),
+                Location = new LocationViewModel { Name = x.Location.Name },
                 Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
             });
 
@@ -71,7 +97,7 @@ namespace PokemonApi.Web.Controllers
 
         [HttpPost("location")]
         [Authorize(Roles = RoleNames.ADMIN)]
-        public async Task<IActionResult> CreateLocation(LocationViewInputModel location)
+        public async Task<IActionResult> CreateLocation(LocationInputModel location)
         {
             var newLocation = new LocationEntity { Name = location.Name };
             Guid id = await this._locationService.CreateLocationAsync(newLocation);
@@ -84,7 +110,7 @@ namespace PokemonApi.Web.Controllers
 
         [HttpPut("location/{id}")]
         [Authorize(Roles = RoleNames.ADMIN)]
-        public async Task<IActionResult> UpdateLocation([FromRoute] Guid id, LocationViewInputModel location)
+        public async Task<IActionResult> UpdateLocation([FromRoute] Guid id, LocationInputModel location)
         {
             bool exists = await this._locationService.ExistsAsync(id);
 

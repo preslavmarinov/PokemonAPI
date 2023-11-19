@@ -1,6 +1,6 @@
 ﻿namespace PokemonApi.Web.Models.Location
 {
-    public class LocationViewInputModel
+    public class LocationInputModel
     {
         public string Name { get; set; }
     }

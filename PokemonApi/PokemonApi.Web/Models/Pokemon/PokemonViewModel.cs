@@ -5,6 +5,7 @@ namespace PokemonApi.Web.Models.Pokemon
 {
     public class PokemonViewModel
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
 
         public string HP { get; set; }
@@ -19,9 +20,9 @@ namespace PokemonApi.Web.Models.Pokemon
 
         public string IsLegendary { get; set; }
 
-        public TypeViewInputModel[] Types { get; set; }
+        public TypeViewModel[] Types { get; set; }
 
-        public LocationViewInputModel Location { get; set; }
+        public LocationViewModel Location { get; set; }
 
         public string? Owner { get; set; }
     }

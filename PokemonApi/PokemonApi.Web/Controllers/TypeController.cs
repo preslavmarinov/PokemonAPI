@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using PokemonApi.Common;
+using PokemonApi.Common.Configurations;
 using PokemonApi.Data.Models;
 using PokemonApi.Services.Interfaces;
 using PokemonApi.Web.Controllers.Abstract;
@@ -15,17 +18,22 @@ namespace PokemonApi.Web.Controllers
     public class TypeController : ApiBaseController
     {
         private readonly ITypeService _typeService;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IConfiguration _configuration;
 
-        public TypeController(ITypeService typeService)
+        public TypeController(ITypeService typeService, IMemoryCache memoryCache, IConfiguration configuration)
         {
             this._typeService = typeService;
+            this._memoryCache = memoryCache;
+            this._configuration = configuration;
         }
 
         [HttpGet("type/{id}")]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            var type = await this._typeService.GetTypeByIdAsync(id, x => new TypeViewInputModel
+            var type = await this._typeService.GetTypeByIdAsync(id, x => new TypeViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
             });
 
@@ -40,7 +48,24 @@ namespace PokemonApi.Web.Controllers
         [HttpGet("types")]
         public async Task<IActionResult> GetTypes()
         {
-            var types = await this._typeService.GetTypesAsync(x => new TypeViewInputModel { Name = x.Name });
+            bool isRequestCached = this._memoryCache.TryGetValue(CacheKeys.TYPES_CACHE_KEY, out IEnumerable<TypeViewModel> cachedData);
+
+            if (isRequestCached)
+            {
+                return this.Ok(cachedData);
+            }
+
+            var types = await this._typeService.GetTypesAsync(x => new TypeViewModel { Id = x.Id, Name = x.Name });
+
+            long expiration = this._configuration.GetSection("Cache").Get<CacheConfiguration>().Duration;
+
+            this._memoryCache.Set(
+                CacheKeys.TYPES_CACHE_KEY,
+                types,
+                new MemoryCacheEntryOptions()
+                    .SetSize(types.LongCount())
+                    .SetAbsoluteExpiration(
+                        TimeSpan.FromSeconds(expiration)));
 
             return this.Ok(types);
         }
@@ -60,8 +85,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewInputModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewInputModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray(),
+                Location = new LocationViewModel { Name = x.Location.Name },
                 Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
             });
 
@@ -70,7 +95,7 @@ namespace PokemonApi.Web.Controllers
 
         [HttpPost("type")]
         [Authorize(Roles = RoleNames.ADMIN)]
-        public async Task<IActionResult> CreateType(TypeViewInputModel type)
+        public async Task<IActionResult> CreateType(TypeInputModel type)
         {
             var newType = new TypeEntity { Name = type.Name };
             Guid id = await this._typeService.CreateTypeAsync(newType);
@@ -83,7 +108,7 @@ namespace PokemonApi.Web.Controllers
 
         [HttpPut("type/{id}")]
         [Authorize(Roles = RoleNames.ADMIN)]
-        public async Task<IActionResult> UpdateType([FromRoute] Guid id, TypeViewInputModel type)
+        public async Task<IActionResult> UpdateType([FromRoute] Guid id, TypeInputModel type)
         {
             //TODO
             bool exists = await this._typeService.ExistsAsync(id);
