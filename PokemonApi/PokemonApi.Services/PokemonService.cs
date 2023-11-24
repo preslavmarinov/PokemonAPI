@@ -116,28 +116,5 @@ namespace PokemonApi.Services
 
         public async Task<bool> ExistsAsync(Guid id)
             => await this._context.Pokemons.AnyAsync(x => x.Id == id);
-
-        public static void PrintPokemonDetails(PokemonEntity pokemon)
-        {
-            Console.WriteLine($"Pokemon Details for {pokemon.Name}:");
-            Console.WriteLine($"HP: {pokemon.HP}");
-            Console.WriteLine($"Attack: {pokemon.Attack}");
-            Console.WriteLine($"Defence: {pokemon.Defence}");
-            Console.WriteLine($"Speed: {pokemon.Speed}");
-            Console.WriteLine($"Generation: {pokemon.Generation}");
-            Console.WriteLine($"Is Legendary: {pokemon.IsLegendary}");
-
-            Console.WriteLine("Types:");
-            foreach (var type in pokemon.Types)
-            {
-                Console.WriteLine($"  {type.Type.Name}");
-            }
-            Console.WriteLine($"LocationId: {pokemon.LocationId}");
-            Console.WriteLine($"Location: {pokemon.Location?.Name ?? "Unknown"}");
-            Console.WriteLine($"User: {pokemon.ApplicationUser?.UserName ?? "Unknown"}");
-            Console.WriteLine($"UserId: {pokemon.ApplicationUserId}");
-
-            Console.WriteLine("------------------------------");
-        }
     }
 }

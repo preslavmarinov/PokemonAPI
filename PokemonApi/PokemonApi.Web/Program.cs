@@ -69,6 +69,7 @@ builder.Services.AddTransient<ITypeService, TypeService>();
 builder.Services.AddTransient<IPokemonService, PokemonService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IPlayService, PlayService>();
+builder.Services.AddTransient<IPdfService, PdfService>();
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 

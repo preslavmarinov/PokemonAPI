@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using PokemonApi.Common;
 using PokemonApi.Common.Configurations;
 using PokemonApi.Data.Models;
@@ -12,7 +11,7 @@ using PokemonApi.Web.Models.Pokemon;
 using PokemonApi.Web.Models.Type;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiI0NDNlYWFkOS1lYmI3LTQyOTgtNGZmYS0wOGRiZGUzNzIyYWIiLCJVc2VyTmFtZSI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcwMDQxMDc2NSwiZXhwIjoxNzAwNDk3MTY1LCJpYXQiOjE3MDA0MTA3NjV9.4vYofN0EduktvoMFplJ3XZnK9Cza97a8-paFZ-rjAhk
+
 namespace PokemonApi.Web.Controllers
 {
     [Authorize(PolicyNames.USER_AND_ABOVE)]

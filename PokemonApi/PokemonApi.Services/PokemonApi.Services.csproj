@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="30.0.1" />
+    <PackageReference Include="QuestPDF" Version="2022.12.10" />
   </ItemGroup>
 
 </Project>
