@@ -9,7 +9,7 @@ namespace PokemonApi.Services
     {
         public byte[] GetPdf(BasePdf pdfFile)
         {
-            IDocument document = pdfFile.GenerateDocument();
+            IDocument document = pdfFile.CreateDocument();
 
             MemoryStream stream = new MemoryStream();
 

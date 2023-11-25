@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using PokemonApi.Common;
@@ -20,12 +21,18 @@ namespace PokemonApi.Web.Controllers
         private readonly ILocationService _locationService;
         private readonly IMemoryCache _memoryCache;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public LocationController(ILocationService locationService, IMemoryCache memoryCache, IConfiguration configuration)
+        public LocationController(
+            ILocationService locationService,
+            IMemoryCache memoryCache,
+            IConfiguration configuration,
+            IMapper mapper)
         {
             this._locationService = locationService;
             this._memoryCache = memoryCache;
             this._configuration = configuration;
+            this._mapper = mapper;
         }
 
         [HttpGet("location/{id}")]
@@ -86,8 +93,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel {Id = y.Type.Id, Name = y.Type.Name }).ToArray(),
+                Location = new LocationViewModel { Id = x.Location.Id, Name = x.Location.Name },
                 Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
             });
 
@@ -121,8 +128,9 @@ namespace PokemonApi.Web.Controllers
             var updatedlocation = new LocationEntity { Name = location.Name };
 
             var existingLocation = await this._locationService.UpdateLocationAsync(id,updatedlocation);
+            var result = this._mapper.Map<LocationViewModel>(existingLocation);
 
-            return this.Ok(existingLocation);
+            return this.Ok(result);
         }
 
         [HttpDelete("location/{id}")]

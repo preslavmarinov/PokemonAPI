@@ -9,6 +9,6 @@ namespace PokemonApi.Services.Pdf
 {
     public abstract class BasePdf
     {
-        public abstract IDocument GenerateDocument();
+        public abstract IDocument CreateDocument();
     }
 }

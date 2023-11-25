@@ -17,7 +17,7 @@ namespace PokemonApi.Web.Pdf
             this.model = model;
         }
 
-        public override IDocument GenerateDocument()
+        public override IDocument CreateDocument()
             => Document.Create(doc =>
             {
                 doc.Page(page =>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -20,12 +21,18 @@ namespace PokemonApi.Web.Controllers
         private readonly ITypeService _typeService;
         private readonly IMemoryCache _memoryCache;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public TypeController(ITypeService typeService, IMemoryCache memoryCache, IConfiguration configuration)
+        public TypeController(
+            ITypeService typeService,
+            IMemoryCache memoryCache,
+            IConfiguration configuration,
+            IMapper mapper)
         {
             this._typeService = typeService;
             this._memoryCache = memoryCache;
             this._configuration = configuration;
+            this._mapper = mapper;
         }
 
         [HttpGet("type/{id}")]
@@ -78,6 +85,7 @@ namespace PokemonApi.Web.Controllers
         {
             var pokemons = await this._typeService.GetPokemonsByType(typeId, page, perPage, x => new PokemonViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
                 HP = x.HP.ToString(),
                 Attack = x.Attack.ToString(),
@@ -85,8 +93,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel {Id = y.Type.Id, Name = y.Type.Name }).ToArray(),
+                Location = new LocationViewModel {Id = x.Location.Id, Name = x.Location.Name },
                 Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
             });
 
@@ -110,7 +118,6 @@ namespace PokemonApi.Web.Controllers
         [Authorize(Roles = RoleNames.ADMIN)]
         public async Task<IActionResult> UpdateType([FromRoute] Guid id, TypeInputModel type)
         {
-            //TODO
             bool exists = await this._typeService.ExistsAsync(id);
 
             if (!exists)
@@ -121,8 +128,9 @@ namespace PokemonApi.Web.Controllers
             var updatedType = new TypeEntity { Name = type.Name };
 
             var existingType = await this._typeService.UpdateTypeAsync(id, updatedType);
+            var result = this._mapper.Map<TypeViewModel>(existingType);
 
-            return this.Ok(existingType);
+            return this.Ok(result);
         }
 
         [HttpDelete("type/{id}")]

@@ -21,13 +21,21 @@ namespace PokemonApi.Web.Mapper
                 .ForMember(dest => dest.Speed, opt => opt.MapFrom(src => src.Speed.ToString()))
                 .ForMember(dest => dest.Generation, opt => opt.MapFrom(src => src.Generation.ToString()))
                 .ForMember(dest => dest.IsLegendary, opt => opt.MapFrom(src => src.IsLegendary.ToString()))
-                .ForMember(dest => dest.Types, opt => opt.MapFrom(src => src.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray()))
-                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => new LocationViewModel { Name = src.Location.Name }))
+                .ForMember(dest => dest.Types, opt => opt.MapFrom(src => src.Types.Select(y => new TypeViewModel {Id = y.Type.Id, Name = y.Type.Name }).ToArray()))
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => new LocationViewModel {Id = src.Location.Id, Name = src.Location.Name }))
                 .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.ApplicationUser != null ? src.ApplicationUser.Email : null));
 
             CreateMap<ApplicationUser, UserViewModel>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
+
+            CreateMap<TypeEntity, TypeViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
+
+            CreateMap<LocationEntity, LocationViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
         }
     }
 }

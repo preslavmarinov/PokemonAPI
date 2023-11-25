@@ -46,7 +46,7 @@ namespace PokemonApi.Web.Controllers
         {
             var users = await this._userService.GetUsersAsync();
 
-            var userViewModels = this._mapper.Map<UserViewModel>(users);
+            var userViewModels = this._mapper.Map<IEnumerable<UserViewModel>>(users);
 
             return Ok(userViewModels);
         }
@@ -56,6 +56,7 @@ namespace PokemonApi.Web.Controllers
         {
             var pokemons = await this._userService.GetUserPokemonsAsync(userId, x => new PokemonViewModel
             {
+                Id = x.Id,
                 Name = x.Name,
                 HP = x.HP.ToString(),
                 Attack = x.Attack.ToString(),
@@ -63,8 +64,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name }).ToArray(),
-                Location = new LocationViewModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel {Id = y.Type.Id, Name = y.Type.Name }).ToArray(),
+                Location = new LocationViewModel {Id = x.Location.Id, Name = x.Location.Name },
                 Owner = x.ApplicationUser != null ? x.ApplicationUser.Email : null,
             });
 
@@ -112,8 +113,9 @@ namespace PokemonApi.Web.Controllers
             };
 
             var existingUser = await this._userService.UpdateUserAsync(id, updatedUser);
+            var result = _mapper.Map<UserViewModel>(existingUser);
 
-            return Ok(existingUser);
+            return Ok(result);
         }
 
         [HttpDelete("user/{id}")]

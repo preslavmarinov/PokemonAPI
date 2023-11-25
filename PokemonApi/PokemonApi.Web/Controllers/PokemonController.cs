@@ -5,14 +5,12 @@ using PokemonApi.Common;
 using PokemonApi.Common.Enums;
 using PokemonApi.Data.Models;
 using PokemonApi.Services.Interfaces;
-using PokemonApi.Services.Seeding.DTO;
 using PokemonApi.Web.Controllers.Abstract;
 using PokemonApi.Web.Models.Location;
 using PokemonApi.Web.Models.Pokemon;
 using PokemonApi.Web.Models.Type;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PokemonApi.Web.Controllers
 {
@@ -41,8 +39,8 @@ namespace PokemonApi.Web.Controllers
                 Speed = x.Speed.ToString(),
                 Generation = x.Generation.ToString(),
                 IsLegendary = x.IsLegendary.ToString(),
-                Types = x.Types.Select(y => new TypeViewModel { Name = y.Type.Name}).ToArray(),
-                Location = new LocationViewModel { Name = x.Location.Name },
+                Types = x.Types.Select(y => new TypeViewModel {Id = y.Type.Id, Name = y.Type.Name}).ToArray(),
+                Location = new LocationViewModel {Id = x.Location.Id, Name = x.Location.Name },
                 Owner = x.ApplicationUser!=null ? x.ApplicationUser.Email : null,
             });
 
@@ -104,6 +102,7 @@ namespace PokemonApi.Web.Controllers
 
             var updatedPokemon = new PokemonEntity
             {
+                Id = id,
                 Name = pokemon.Name,
                 HP = int.Parse(pokemon.HP),
                 Attack = int.Parse(pokemon.Attack),
@@ -111,7 +110,7 @@ namespace PokemonApi.Web.Controllers
                 Speed = int.Parse(pokemon.Speed),
                 Generation = int.Parse(pokemon.Generation),
                 IsLegendary = bool.Parse(pokemon.IsLegendary),
-                Types = pokemon.TypeIds.Select(x => new PokemonType { TypeId = x }).ToArray(),
+                Types = pokemon.TypeIds.Select(x => new PokemonType { PokemonId = id, TypeId = x }).ToArray(),
                 LocationId = pokemon.LocationId,
             };
 

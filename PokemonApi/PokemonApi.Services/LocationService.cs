@@ -67,7 +67,7 @@ namespace PokemonApi.Services
                 return await this._context.Pokemons.Where(x => x.LocationId == id).Select(selector).ToListAsync();
             }
 
-            return await this._context.Pokemons.Skip((page-1)*perPage).Take(perPage).Where(x => x.LocationId == id).Select(selector).ToListAsync();
+            return await this._context.Pokemons.Where(x => x.LocationId == id).Skip((page-1)*perPage).Take(perPage).Select(selector).ToListAsync();
         }
     }
 }

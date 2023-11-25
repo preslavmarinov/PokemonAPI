@@ -5,6 +5,7 @@ using PokemonApi.Data.Models;
 using PokemonApi.Data.Models.Identity;
 using PokemonApi.Services.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -96,22 +97,12 @@ namespace PokemonApi.Services
 
         public async Task<PokemonEntity> UpdatePokemonAsync(Guid id, PokemonEntity updatedPokemon)
         {
-            var existingPokemon = await this._context.Pokemons.FindAsync(id);
-            existingPokemon.Name = updatedPokemon.Name;
-            existingPokemon.HP= updatedPokemon.HP;
-            existingPokemon.Attack = updatedPokemon.Attack;
-            existingPokemon.Defence = updatedPokemon.Defence;
-            existingPokemon.Speed = updatedPokemon.Speed;
-            existingPokemon.Generation = updatedPokemon.Generation;
-            existingPokemon.IsLegendary = updatedPokemon.IsLegendary;
-            existingPokemon.Types = updatedPokemon.Types;
-            existingPokemon.LocationId = updatedPokemon.LocationId;
 
-            this._context.Pokemons.Update(existingPokemon);
+            this._context.Pokemons.Update(updatedPokemon);
 
             await this._context.SaveChangesAsync();
 
-            return existingPokemon;
+            return updatedPokemon;
         }
 
         public async Task<bool> ExistsAsync(Guid id)

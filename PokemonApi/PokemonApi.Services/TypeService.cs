@@ -72,9 +72,9 @@ namespace PokemonApi.Services
             }
 
             return await this._context.Pokemons
+                .Where(x => pokemonIds.Contains(x.Id))
                 .Skip((page-1)*perPage)
                 .Take(perPage)
-                .Where(x => pokemonIds.Contains(x.Id))
                 .Select(selector).ToListAsync();
         }
     }
